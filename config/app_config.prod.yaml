@@ -1,0 +1,18 @@
+project:
+  name: "FastAPI MCP Application"
+  version: "1.0.0"
+  api_v1_str: "/api/v1"
+
+server:
+  allowed_hosts:
+    - "https://api.yourdomain.com"
+    - "https://app.yourdomain.com"
+
+mcp:
+  tool_timeout: 30  # Shorter timeout for production
+  enable_arize: true  # Enable Arize in production
+
+auth:
+  enable_jwt: true  # Enable JWT in production
+  secret_key: "${JWT_SECRET_KEY}"  # Use environment variable in production
+  algorithm: "HS256" 

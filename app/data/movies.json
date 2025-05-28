@@ -1,0 +1,226 @@
+[
+    {
+        "id": "1",
+        "title": "The Shawshank Redemption",
+        "description": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+        "duration": 142,
+        "genres": ["Drama"],
+        "rating": "R",
+        "release_date": "1994-09-23",
+        "director": "Frank Darabont",
+        "cast": ["Tim Robbins", "Morgan Freeman", "Bob Gunton"],
+        "reviews": [
+            {
+                "id": "1",
+                "movie_id": "1",
+                "user_id": "user1",
+                "rating": 5,
+                "comment": "One of the greatest movies ever made.",
+                "created_at": "2024-01-01T00:00:00Z",
+                "helpful_votes": 100
+            }
+        ],
+        "average_rating": 4.8,
+        "total_reviews": 1,
+        "poster_url": "https://example.com/shawshank.jpg",
+        "trailer_url": "https://example.com/shawshank-trailer.mp4",
+        "imdb_rating": 9.3,
+        "rotten_tomatoes_score": 98
+    },
+    {
+        "id": "2",
+        "title": "The Godfather",
+        "description": "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+        "duration": 175,
+        "genres": ["Crime", "Drama"],
+        "rating": "R",
+        "release_date": "1972-03-24",
+        "director": "Francis Ford Coppola",
+        "cast": ["Marlon Brando", "Al Pacino", "James Caan"],
+        "reviews": [
+            {
+                "id": "2",
+                "movie_id": "2",
+                "user_id": "user2",
+                "rating": 5,
+                "comment": "A masterpiece of cinema.",
+                "created_at": "2024-01-02T00:00:00Z",
+                "helpful_votes": 95
+            }
+        ],
+        "average_rating": 4.9,
+        "total_reviews": 1,
+        "poster_url": "https://example.com/godfather.jpg",
+        "trailer_url": "https://example.com/godfather-trailer.mp4",
+        "imdb_rating": 9.2,
+        "rotten_tomatoes_score": 97
+    },
+    {
+        "id": "3",
+        "title": "The Dark Knight",
+        "description": "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+        "duration": 152,
+        "genres": ["Action", "Crime", "Drama"],
+        "rating": "PG-13",
+        "release_date": "2008-07-18",
+        "director": "Christopher Nolan",
+        "cast": ["Christian Bale", "Heath Ledger", "Aaron Eckhart"],
+        "reviews": [
+            {
+                "id": "3",
+                "movie_id": "3",
+                "user_id": "user3",
+                "rating": 5,
+                "comment": "Heath Ledger's Joker is unforgettable.",
+                "created_at": "2024-01-03T00:00:00Z",
+                "helpful_votes": 90
+            }
+        ],
+        "average_rating": 4.7,
+        "total_reviews": 1,
+        "poster_url": "https://example.com/dark-knight.jpg",
+        "trailer_url": "https://example.com/dark-knight-trailer.mp4",
+        "imdb_rating": 9.0,
+        "rotten_tomatoes_score": 94
+    },
+    {
+        "id": "4",
+        "title": "Inception",
+        "description": "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+        "duration": 148,
+        "genres": ["Action", "Science Fiction", "Thriller"],
+        "rating": "PG-13",
+        "release_date": "2010-07-16",
+        "director": "Christopher Nolan",
+        "cast": ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Ellen Page"],
+        "reviews": [
+            {
+                "id": "4",
+                "movie_id": "4",
+                "user_id": "user4",
+                "rating": 5,
+                "comment": "Mind-bending masterpiece.",
+                "created_at": "2024-01-04T00:00:00Z",
+                "helpful_votes": 85
+            }
+        ],
+        "average_rating": 4.6,
+        "total_reviews": 1,
+        "poster_url": "https://example.com/inception.jpg",
+        "trailer_url": "https://example.com/inception-trailer.mp4",
+        "imdb_rating": 8.8,
+        "rotten_tomatoes_score": 87
+    },
+    {
+        "id": "5",
+        "title": "The Matrix",
+        "description": "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
+        "duration": 136,
+        "genres": ["Action", "Science Fiction"],
+        "rating": "R",
+        "release_date": "1999-03-31",
+        "director": "Lana Wachowski",
+        "cast": ["Keanu Reeves", "Laurence Fishburne", "Carrie-Anne Moss"],
+        "reviews": [
+            {
+                "id": "5",
+                "movie_id": "5",
+                "user_id": "user5",
+                "rating": 5,
+                "comment": "Revolutionary film that changed action movies forever.",
+                "created_at": "2024-01-05T00:00:00Z",
+                "helpful_votes": 80
+            }
+        ],
+        "average_rating": 4.5,
+        "total_reviews": 1,
+        "poster_url": "https://example.com/matrix.jpg",
+        "trailer_url": "https://example.com/matrix-trailer.mp4",
+        "imdb_rating": 8.7,
+        "rotten_tomatoes_score": 88
+    },
+    {
+        "id": "6",
+        "title": "The Lord of the Rings: The Fellowship of the Ring",
+        "description": "A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.",
+        "duration": 178,
+        "genres": ["Action", "Adventure", "Drama", "Fantasy"],
+        "rating": "PG-13",
+        "release_date": "2001-12-19",
+        "director": "Peter Jackson",
+        "cast": ["Elijah Wood", "Ian McKellen", "Viggo Mortensen"],
+        "reviews": [
+            {
+                "id": "6",
+                "movie_id": "6",
+                "user_id": "user6",
+                "rating": 5,
+                "comment": "Epic fantasy at its finest.",
+                "created_at": "2024-01-06T00:00:00Z",
+                "helpful_votes": 75
+            }
+        ],
+        "average_rating": 4.4,
+        "total_reviews": 1,
+        "poster_url": "https://example.com/lotr.jpg",
+        "trailer_url": "https://example.com/lotr-trailer.mp4",
+        "imdb_rating": 8.8,
+        "rotten_tomatoes_score": 91
+    },
+    {
+        "id": "7",
+        "title": "Pulp Fiction",
+        "description": "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+        "duration": 154,
+        "genres": ["Crime", "Drama"],
+        "rating": "R",
+        "release_date": "1994-10-14",
+        "director": "Quentin Tarantino",
+        "cast": ["John Travolta", "Uma Thurman", "Samuel L. Jackson"],
+        "reviews": [
+            {
+                "id": "7",
+                "movie_id": "7",
+                "user_id": "user7",
+                "rating": 5,
+                "comment": "Tarantino's masterpiece with non-linear storytelling.",
+                "created_at": "2024-01-07T00:00:00Z",
+                "helpful_votes": 70
+            }
+        ],
+        "average_rating": 4.3,
+        "total_reviews": 1,
+        "poster_url": "https://example.com/pulp-fiction.jpg",
+        "trailer_url": "https://example.com/pulp-fiction-trailer.mp4",
+        "imdb_rating": 8.9,
+        "rotten_tomatoes_score": 92
+    },
+    {
+        "id": "8",
+        "title": "Forrest Gump",
+        "description": "The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75.",
+        "duration": 142,
+        "genres": ["Drama", "Romance"],
+        "rating": "PG-13",
+        "release_date": "1994-07-06",
+        "director": "Robert Zemeckis",
+        "cast": ["Tom Hanks", "Robin Wright", "Gary Sinise"],
+        "reviews": [
+            {
+                "id": "8",
+                "movie_id": "8",
+                "user_id": "user8",
+                "rating": 5,
+                "comment": "A heartwarming journey through American history.",
+                "created_at": "2024-01-08T00:00:00Z",
+                "helpful_votes": 65
+            }
+        ],
+        "average_rating": 4.2,
+        "total_reviews": 1,
+        "poster_url": "https://example.com/forrest-gump.jpg",
+        "trailer_url": "https://example.com/forrest-gump-trailer.mp4",
+        "imdb_rating": 8.8,
+        "rotten_tomatoes_score": 71
+    }
+] 

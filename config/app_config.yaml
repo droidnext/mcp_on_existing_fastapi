@@ -1,0 +1,13 @@
+project:
+  name: "FastAPI MCP Application"
+  version: "1.0.0"
+  api_v1_str: "/api/v1"
+
+server:
+  allowed_hosts:
+    - "http://localhost:8000"
+    - "http://localhost:3000"
+
+mcp:
+  tool_timeout: 30  # seconds
+  enable_arize: false  # Control Arize Phoenix instrumentation 

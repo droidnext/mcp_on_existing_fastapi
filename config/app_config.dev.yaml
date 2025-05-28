@@ -1,0 +1,20 @@
+project:
+  name: "FastAPI MCP Application (Dev)"
+  version: "1.0.0"
+  api_v1_str: "/api/v1"
+
+server:
+  allowed_hosts:
+    - "http://localhost:8000"
+    - "http://localhost:3000"
+    - "http://127.0.0.1:8000"
+    - "http://127.0.0.1:3000"
+
+mcp:
+  tool_timeout: 60  # Longer timeout for development
+  enable_arize: false  # Disable Arize in development
+
+auth:
+  enable_jwt: false  # Disable JWT in development
+  secret_key: "dev-secret-key"  # Development secret key
+  algorithm: "HS256" 
