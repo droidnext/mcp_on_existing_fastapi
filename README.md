@@ -2,6 +2,12 @@
 
 A FastAPI application with Model Context Protocol (MCP) integration for AI tools such as movie recommendation and search.
 
+THis repo is to demonstrate integrating MCP tools into exisitng FastAPI App.
+
+## 📚 Resources
+- [Medium article on Integrating MCP into exisitng FastAPI application ](https://medium.com/@droidnext/model-context-protocol-mcp-sampling-e966524db565)
+  - Full URL: https://medium.com/@droidnext/model-context-protocol-mcp-sampling-e966524db565
+
 ---
 
 ## 🧰 Features
@@ -25,7 +31,6 @@ A FastAPI application with Model Context Protocol (MCP) integration for AI tools
 
 ### Clone the repository
 
-```bash
 git clone <repository-url>
 cd <repository-name>
 
@@ -33,7 +38,6 @@ cd <repository-name>
 
 Set up the development environment using `uv`:
 
-```bash
 uv init
 uv venv
 source .venv/bin/activate
@@ -41,7 +45,6 @@ uv pip install -r requirements.txt
 
 
 Install MCP inspector:
-```bash
 npm install @modelcontextprotocol/inspector
 ```
 
@@ -77,10 +80,9 @@ npx @modelcontextprotocol/inspector node build/index.js
 ```
 
 ## 📡 API Endpoints
-
-- `/api/v1/movies`: Movie-related endpoints
-- `/mcp`: MCP tools and endpoints
 - `/routes`: List all available routes
+- `/api/v1/movies`: Movie-related endpoints
+- `/mcp-server/mcp`: MCP tools and endpoints
 
 ## 🛠️ MCP Tools
 
