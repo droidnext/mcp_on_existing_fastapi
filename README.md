@@ -5,8 +5,8 @@ A FastAPI application with Model Context Protocol (MCP) integration for AI tools
 THis repo is to demonstrate integrating MCP tools into exisitng FastAPI App.
 
 ## 📚 Resources
-- [Medium article on Integrating MCP into exisitng FastAPI application ](https://medium.com/@droidnext/model-context-protocol-mcp-sampling-e966524db565)
-  - Full URL: https://medium.com/@droidnext/model-context-protocol-mcp-sampling-e966524db565
+- [Medium article on Integrating MCP into exisitng FastAPI application ](https://medium.com/@droidnext/integrating-model-context-protocol-mcp-into-existing-apis-c737d6587d12)
+  - Full URL: https://medium.com/@droidnext/integrating-model-context-protocol-mcp-into-existing-apis-c737d6587d12
 
 ---
 
