@@ -147,6 +147,19 @@ Once connected, your server should appear as running in the settings:
 
 ![Claude Desktop Running Server](docs/claude_desktop_running_server.png)
 
+
+Enter your prompt in to chat field:
+"Give me some Action movies"
+This shoule pop up window asking permission to talk to your Movies MCP server
+
+![Claude Desktop Connecting to MCP server tool](docs/claude_desktop_chat_question1.png)
+
+
+Claude Desktop will connect to MCP server and invoke suggsted_movies tool to fetch movies and pass to the LLM
+
+![Claude Desktop showing LLM response after making tool call and passing tool response as context to LLM ](docs/claude_desktop_chat_answer1.png)
+
+
 ## License
 
 MIT
