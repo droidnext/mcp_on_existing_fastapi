@@ -92,7 +92,7 @@
         "rating": "PG-13",
         "release_date": "2010-07-16",
         "director": "Christopher Nolan",
-        "cast": ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Ellen Page"],
+        "cast": ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Elliot Page"],
         "reviews": [
             {
                 "id": "4",
@@ -277,4 +277,4 @@
         "imdb_rating": 8.3,
         "rotten_tomatoes_score": 100
     }
-] 
+]

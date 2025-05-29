@@ -15,6 +15,13 @@ class Genre(str, Enum):
     ROMANCE = "Romance"
     SCIENCE_FICTION = "Science Fiction"
     THRILLER = "Thriller"
+    ANIMATION = "Animation"
+    FAMILY = "Family"
+    MUSICAL = "Musical"
+    WAR = "War"
+    WESTERN = "Western"
+    BIOGRAPHY = "Biography"
+    DOCUMENTARY = "Documentary"
 
 class Rating(str, Enum):
     G = "G"

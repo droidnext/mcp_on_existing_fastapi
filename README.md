@@ -1,4 +1,4 @@
-# 🚀 FastAPI MCP Application
+# 🚀 Integrating MCP into existing FastAPI Application
 
 A FastAPI application with Model Context Protocol (MCP) integration for AI tools such as movie recommendation and search.
 
