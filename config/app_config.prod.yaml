@@ -10,7 +10,6 @@ server:
 
 mcp:
   tool_timeout: 30  # Shorter timeout for production
-  enable_arize: true  # Enable Arize in production
 
 auth:
   enable_jwt: true  # Enable JWT in production

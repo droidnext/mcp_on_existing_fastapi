@@ -12,7 +12,6 @@ server:
 
 mcp:
   tool_timeout: 60  # Longer timeout for development
-  enable_arize: false  # Disable Arize in development
 
 auth:
   enable_jwt: false  # Disable JWT in development

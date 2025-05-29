@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -5,6 +6,8 @@ from app.core.middleware import LoggingMiddleware, JWTAuthMiddleware, OriginVali
 from app.core.lifespan import shared_lifespan
 from app.api.routes import router as api_router
 from app.mcp.mcp_routes import mcp_app
+
+logger = logging.getLogger("MainApp")
 
 # Create main FastAPI app
 app = FastAPI(
@@ -18,6 +21,7 @@ app = FastAPI(
 app.add_middleware(LoggingMiddleware)
 
 # Conditionally apply JWT middleware
+logger.info(f"ENABLE_JWT: {settings.ENABLE_JWT}")
 if settings.ENABLE_JWT:
     app.add_middleware(JWTAuthMiddleware)
 

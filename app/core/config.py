@@ -35,7 +35,6 @@ class Settings(BaseSettings):
     
     # MCP settings
     MCP_TOOL_TIMEOUT: int = yaml_config["mcp"]["tool_timeout"]
-    ENABLE_ARIZE: bool = yaml_config["mcp"]["enable_arize"]
 
     # Auth settings
     ENABLE_JWT: bool = yaml_config["auth"]["enable_jwt"]

@@ -1,34 +1,46 @@
-# FastAPI MCP Application
+# 🚀 FastAPI MCP Application
 
-A FastAPI application with Model Context Protocol (MCP) integration for AI tools.
+A FastAPI application with Model Context Protocol (MCP) integration for AI tools such as movie recommendation and search.
 
-## Features
+---
 
-- FastAPI backend with MCP integration
-- Movie recommendation and search tools
-- JWT authentication (configurable)
-- Arize Phoenix integration (configurable)
-- Environment-specific configurations
+## 🧰 Features
 
-## Prerequisites
+- ⚡ FastAPI backend with MCP integration
+- 🎬 Movie recommendation and search tools
+- 🔐 Configurable JWT authentication
+- 🛠️ Environment-specific YAML configurations
+
+---
+
+## 📦 Prerequisites
 
 - Python 3.8+
 - Node.js 14+ (for MCP inspector)
+- [`uv`](https://github.com/astral-sh/uv) (Python dependency management)
 
-## Installation
+---
 
-1. Clone the repository:
+## 🧑‍💻 Installation
+
+### Clone the repository
+
 ```bash
 git clone <repository-url>
 cd <repository-name>
-```
 
-2. Install Python dependencies:
+## 🛠️ Setup Instructions
+
+Set up the development environment using `uv`:
+
 ```bash
-pip install -r requirements.txt
-```
+uv init
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 
-3. Install MCP inspector:
+
+Install MCP inspector:
 ```bash
 npm install @modelcontextprotocol/inspector
 ```
@@ -46,10 +58,9 @@ You can override settings using environment variables or a `.env` file.
 
 - `APP_ENV`: Set to 'dev' or 'prod' to use different configurations
 - `ENABLE_JWT`: Toggle JWT authentication
-- `ENABLE_ARIZE`: Toggle Arize Phoenix instrumentation
 - `MCP_TOOL_TIMEOUT`: Set timeout for MCP tools
 
-## Running the Application
+## 🚀 Running the Application
 
 1. Start the FastAPI server:
 ```bash
@@ -65,13 +76,13 @@ APP_ENV=prod python -m uvicorn app.main:app
 npx @modelcontextprotocol/inspector node build/index.js
 ```
 
-## API Endpoints
+## 📡 API Endpoints
 
 - `/api/v1/movies`: Movie-related endpoints
 - `/mcp`: MCP tools and endpoints
 - `/routes`: List all available routes
 
-## MCP Tools
+## 🛠️ MCP Tools
 
 The application provides the following MCP tools:
 
@@ -94,12 +105,46 @@ APP_ENV=dev
 JWT_SECRET_KEY=your-secret-key
 ```
 
-### Testing
+### 🧪 Testing
 
 ```bash
 pytest
 ```
 
+## 🖥️ Connecting Claude Desktop
+
+To connect Claude Desktop to your local FastAPI MCP server, follow these steps:
+
+1. Open Claude Desktop and navigate to **Settings > Developer**.
+2. Click on **Edit Config**. This will open the `claude_desktop_config.json` file.
+![Claude Desktop Developer Settings](docs/claude_desktop_settings.png)
+3. Add your server configuration to the `mcpServers` object. Here's an example:
+
+```json
+{
+  "mcpServers": {
+    "MyRemoteServer": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://localhost:8000/mcp-server/mcp"
+      ]
+    }
+  }
+}
+```
+
+4. Replace `"MyRemoteServer"` with a name of your choice.
+5. Save the `claude_desktop_config.json` file.
+6. Restart Claude Desktop for the changes to take effect.
+
+Once connected, your server should appear as running in the settings:
+
+![Claude Desktop Running Server](docs/claude_desktop_running_server.png)
+
 ## License
 
-[Your License]
+MIT
+
+
+

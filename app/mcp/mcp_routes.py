@@ -7,7 +7,6 @@ from app.repositories.movie_repository import FileMovieRepository
 from app.models.movie import Genre, Rating
 from app.core.config import settings
 import os
-from phoenix.otel import register
 import asyncio
 from functools import wraps
 from starlette.requests import Request
@@ -42,18 +41,19 @@ def with_timeout(timeout_seconds):
     return decorator
 
 # Conditionally enable Arize Phoenix instrumentation
-if settings.ENABLE_ARIZE:
-    tracer_provider = register(auto_instrument=True)
-    tracer = tracer_provider.get_tracer("mpc-server-movies")
-else:
-    tracer = None
+# if settings.ENABLE_ARIZE:
+#     tracer_provider = register(auto_instrument=True)
+#     tracer = tracer_provider.get_tracer("mpc-server-movies")
+# else:
+#     tracer = None
 
 def trace_tool(name):
-    def decorator(func):
-        if settings.ENABLE_ARIZE and tracer:
-            return tracer.tool(name=name)(func)
-        return func
-    return decorator
+    # def decorator(func):
+    #     if settings.ENABLE_ARIZE and tracer:
+    #         return tracer.tool(name=name)(func)
+    #     return func
+    # Return the original function if tracing is disabled or not available
+    return lambda func: func
 
 @mcp.custom_route("/health", methods=["GET"])
 async def health_check(request: Request) -> PlainTextResponse:
@@ -153,7 +153,10 @@ mcp_app = mcp.http_app(path="/mcp-server")
 
 # Apply middleware to MCP app
 mcp_app.add_middleware(LoggingMiddleware)
-mcp_app.add_middleware(JWTAuthMiddleware)
+# Conditionally apply JWT middleware
+logger.info(f"ENABLE_JWT: {settings.ENABLE_JWT}")
+if settings.ENABLE_JWT:
+    mcp_app.add_middleware(JWTAuthMiddleware)
 mcp_app.add_middleware(OriginValidationMiddleware)
 
 
