@@ -31,6 +31,7 @@ THis repo is to demonstrate integrating MCP tools into exisitng FastAPI App.
 
 ### Clone the repository
 
+```bash
 git clone <repository-url>
 cd <repository-name>
 
@@ -38,6 +39,7 @@ cd <repository-name>
 
 Set up the development environment using `uv`:
 
+```bash
 uv init
 uv venv
 source .venv/bin/activate
@@ -45,6 +47,7 @@ uv pip install -r requirements.txt
 
 
 Install MCP inspector:
+```bash
 npm install @modelcontextprotocol/inspector
 ```
 
