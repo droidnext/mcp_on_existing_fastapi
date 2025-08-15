@@ -19,7 +19,7 @@ logger = logging.getLogger("MCP Movie App")
 # Initialize FastMCP
 mcp = FastMCP(
     "MCP Movie App",
-    description="A movie recommendation and search service",
+    # description="A movie recommendation and search service",
     version="1.0.0"
 )
 
@@ -63,7 +63,20 @@ async def health_check(request: Request) -> PlainTextResponse:
 @trace_tool("MCP.suggest_movie")
 @with_timeout(settings.MCP_TOOL_TIMEOUT)
 async def suggest_movie(genre: str, context: Context) -> str:
-    """Suggest movies based on genre"""
+    """
+    Suggest a list of movies based on a specified genre.
+
+    This method uses the given genre to provide tailored movie suggestions.
+    Ideal for users who are unsure what to watch and want recommendations 
+    based on a specific genre (e.g., action, comedy, romance).
+
+    Args:
+        genre (str): The movie genre to base suggestions on.
+        context (Context): The user or session context for personalization.
+
+    Returns:
+        str: A formatted string containing a list of suggested movies.
+    """
     logger.info(f"Suggesting movie for genre: {genre}")
     try:
         # Convert string genre to Genre enum
@@ -92,7 +105,20 @@ async def suggest_movie(genre: str, context: Context) -> str:
 @trace_tool("MCP.get_top_movies")
 @with_timeout(settings.MCP_TOOL_TIMEOUT)
 async def get_top_movies(context: Context, rating: str = None) -> str:
-    """Get top rated movies, optionally filtered by rating"""
+    """
+    Retrieve top-rated movies, optionally filtered by a specific rating.
+
+    This method fetches the highest-rated movies, with an optional filter 
+    for a specific rating category (e.g., PG, R). It’s useful for users 
+    interested in critically acclaimed or popular content.
+
+    Args:
+        context (Context): The user or session context for personalization.
+        rating (str, optional): Rating category to filter top movies by.
+
+    Returns:
+        str: A formatted string containing a list of top-rated movies.
+    """
     logger.info(f"Getting top movies with rating filter: {rating}")
     try:
         if rating:
@@ -122,18 +148,30 @@ async def get_top_movies(context: Context, rating: str = None) -> str:
         return f"Invalid rating: {rating}. Please use one of: {', '.join(r.value for r in Rating)}"
 
 @mcp.tool()
-@trace_tool("MCP.search_movies")
+@trace_tool("MCP.find_movies_title_cast")
 @with_timeout(settings.MCP_TOOL_TIMEOUT)
-async def search_movies(query: str, context: Context) -> str:
-    """Search for movies by title, description, or cast"""
-    logger.info(f"Searching movies with query: {query}")
-    movies = await movie_service.search_movies(query)
+async def find_movies_title_cast(title: str, cast: str, context: Context) -> str:
+    """
+    Search for movies by  title or cast only.
+
+    This method searches across movie titles and cast members to match the input query.
+
+    Args:
+        title (str): The search keyword or phrase can be title of movie.
+        cast (str): The search keyword or phrase can be cast member.
+        context (Context): The user or session context for personalization.
+
+    Returns:
+        str: A formatted string with a list of movies matching the query.
+    """
+    logger.info(f"Searching movies with title: {title} and cast: {cast}")
+    movies = await movie_service.search_movies(title+" "+cast)
     
     if not movies:
-        return f"No movies found matching '{query}'."
+        return f"No movies found matching '{title}' and '{cast}'."
     
     # Format response with movie details
-    response = f"Here are the movies matching '{query}':\n\n"
+    response = f"Here are the movies matching '{title}' and '{cast}':\n\n"
     for movie in movies:
         response += f"🎬 {movie.title}\n"
         response += f"📝 {movie.description}\n"
@@ -148,7 +186,7 @@ async def search_movies(query: str, context: Context) -> str:
 
 # Create FastMCP app
 # mcp_app = mcp.sse_app()
-mcp_app = mcp.http_app(path="/mcp-server")
+mcp_app = mcp.http_app(path="/mcp-server/mcp" , transport='streamable-http')
 
 
 # Apply middleware to MCP app
