@@ -9,7 +9,7 @@ server:
     - "https://app.yourdomain.com"
 
 mcp:
-  tool_timeout: 30  # Shorter timeout for production
+  tool_timeout: 60  # Shorter timeout for production
 
 auth:
   enable_jwt: true  # Enable JWT in production

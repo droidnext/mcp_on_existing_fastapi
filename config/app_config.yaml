@@ -9,5 +9,5 @@ server:
     - "http://localhost:3000"
 
 mcp:
-  tool_timeout: 30  # seconds
+  tool_timeout: 60  # seconds
   enable_arize: false  # Control Arize Phoenix instrumentation 

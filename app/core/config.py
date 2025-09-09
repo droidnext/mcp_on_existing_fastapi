@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     
     # MCP settings
     MCP_TOOL_TIMEOUT: int = yaml_config["mcp"]["tool_timeout"]
+    ENABLE_ELICITATION: bool = os.getenv("ENABLE_ELICITATION", "false").lower() == "true"
 
     # Auth settings
     ENABLE_JWT: bool = yaml_config["auth"]["enable_jwt"]

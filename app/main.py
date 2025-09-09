@@ -1,4 +1,5 @@
 import logging
+import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -6,6 +7,12 @@ from app.core.middleware import LoggingMiddleware, JWTAuthMiddleware, OriginVali
 from app.core.lifespan import shared_lifespan
 from app.api.routes import router as api_router
 from app.mcp.mcp_routes import mcp_app
+
+# Conditionally import elicitation routes based on environment variable
+if os.getenv("ENABLE_ELICITATION", "false").lower() == "true":
+    from app.mcp.mcp_elicitation_routes import mcp_elicitation
+else:
+    mcp_elicitation = None
 
 logger = logging.getLogger("MainApp")
 
@@ -43,6 +50,13 @@ app.include_router(api_router)
 
 # Mount FastMCP app Endpoints /mcp-server/mcp
 app.mount("/", mcp_app)
+
+# Conditionally mount FastMCP elicitation app based on environment variable
+if settings.ENABLE_ELICITATION and mcp_elicitation is not None:
+    logger.info("Elicitation mode enabled - mounting elicitation endpoints")
+    app.mount("/mcp-server/elicitation", mcp_elicitation.http_app(path="/mcp-server/elicitation", transport='streamable-http'))
+else:
+    logger.info("Elicitation mode disabled - skipping elicitation endpoints")
 
 @app.get("/routes")
 async def list_routes(request: Request):
