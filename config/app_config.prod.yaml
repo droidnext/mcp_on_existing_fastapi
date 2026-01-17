@@ -10,8 +10,17 @@ server:
 
 mcp:
   tool_timeout: 60  # Shorter timeout for production
+  # Transport options: "streamable-http" (default) or "stdio"
+  # streamable-http: HTTP-based transport for web APIs (recommended for production)
+  # stdio: Standard I/O transport for CLI/integrated applications
+  transport: "streamable-http"  # Options: "streamable-http", "stdio"
 
 auth:
-  enable_jwt: true  # Enable JWT in production
-  secret_key: "${JWT_SECRET_KEY}"  # Use environment variable in production
-  algorithm: "HS256" 
+  # Enable/disable JWT authentication middleware
+  # When enabled, all requests (except /docs, /openapi.json, /health, /ready) require JWT Bearer token
+  enable_jwt: true  # Enable JWT in production (set to false to disable)
+  secret_key: "${JWT_SECRET_KEY}"  # Use environment variable in production (required when enable_jwt is true)
+  algorithm: "HS256"  # Default JWT signing algorithm (used if not specified in token header)
+  # Allowed algorithms: List of algorithms that tokens can use (validates against this list)
+  # Restrict to only algorithms you use in production for security
+  allowed_algorithms: ["HS256", "RS256"]  # Example: Only allow HS256 and RS256 in production 

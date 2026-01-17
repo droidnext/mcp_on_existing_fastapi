@@ -1,19 +1,26 @@
-from fastmcp import FastMCP, Context
-import logging
-from app.core.middleware import LoggingMiddleware, JWTAuthMiddleware, OriginValidationMiddleware
-from app.core.lifespan import shared_lifespan
-from app.services.movie_service import MovieService
-from app.repositories.movie_repository import FileMovieRepository
-from app.models.movie import Genre, Rating, Movie
-# Elicitation models moved to mcp_elicitation_routes.py
-from app.core.config import settings
-import os
 import asyncio
+import json
+import logging
+import os
+import time
 from functools import wraps
+
+from fastmcp import FastMCP
+from fastmcp.server import Context
+from fastmcp.server.middleware import Middleware, MiddlewareContext
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
-from starlette.middleware import Middleware
-from typing import List
+
+from app.core.config import settings
+from app.core.middleware import (
+    JWTAuthMiddleware,
+    LoggingMiddleware,
+    OriginValidationMiddleware,
+)
+from app.models.movie import Genre, Rating
+from app.mcp.utils import format_movie_list
+from app.repositories.movie_repository import FileMovieRepository
+from app.services.movie_service import MovieService
 
 
 logger = logging.getLogger("MCP Movie App")
@@ -23,6 +30,41 @@ mcp = FastMCP(
     "MCP Movie App",
     version="1.0.0"
 )
+
+
+# FastMCP middleware for MCP protocol-level operations
+class MCPLoggingMiddleware(Middleware):
+    """Log MCP protocol-level operations."""
+    
+    async def on_message(self, context: MiddlewareContext, call_next):
+        """Log all MCP messages."""
+        logger.info(f"MCP message: {context.method} from {context.source}")
+        try:
+            result = await call_next(context)
+            logger.info(f"MCP message completed: {context.method}")
+            return result
+        except Exception as e:
+            logger.error(f"MCP message failed: {context.method} - {e}")
+            raise
+    
+    async def on_call_tool(self, context: MiddlewareContext, call_next):
+        """Log tool calls with timing."""
+        start = time.time()
+        tool_name = context.message.params.get("name", "unknown")
+        logger.info(f"Calling tool: {tool_name}")
+        try:
+            result = await call_next(context)
+            duration = time.time() - start
+            logger.info(f"Tool {tool_name} completed in {duration:.3f}s")
+            return result
+        except Exception as e:
+            duration = time.time() - start
+            logger.error(f"Tool {tool_name} failed after {duration:.3f}s: {e}")
+            raise
+
+
+# Add FastMCP middleware to the mcp instance (before creating http_app)
+mcp.add_middleware(MCPLoggingMiddleware())
 
 # Initialize movie service
 file_path = os.path.join(os.path.dirname(__file__), "..", "data", "movies.json")
@@ -65,26 +107,15 @@ async def suggest_movie(genre: str, context: Context = None) -> str:
         str: A formatted string containing movie suggestions.
     """
     logger.info(f"Starting movie suggestion with genre: {genre}")
-    
+
     try:
         genre_enum = Genre(genre.capitalize())
         movies = await movie_service.get_by_genre(genre_enum)
-        
+
         if not movies:
             return f"No movies found in the {genre} genre."
-        
-        # Format response with movie details
-        response = "Here are the movie recommendations:\n\n"
-        for movie in movies:
-            response += f"🎬 {movie.title}\n"
-            response += f"📝 {movie.description}\n"
-            response += f"⭐ Rating: {movie.rating}\n"
-            response += f"🎭 Genres: {', '.join(movie.genres)}\n"
-            if movie.imdb_rating:
-                response += f"📊 IMDB Rating: {movie.imdb_rating}/10\n"
-            response += "\n"
-        
-        return response
+
+        return format_movie_list(movies, "movie recommendations")
     except ValueError:
         return f"Invalid genre: {genre}. Please use one of: {', '.join(g.value for g in Genre)}"
 
@@ -118,19 +149,8 @@ async def get_top_movies(context: Context, rating: str = None) -> str:
         if not movies:
             rating_text = f" with rating {rating}" if rating else ""
             return f"No movies found{rating_text}."
-        
-        # Format response with movie details
-        response = "Here are the top movies:\n\n"
-        for movie in movies:
-            response += f"🎬 {movie.title}\n"
-            response += f"📝 {movie.description}\n"
-            response += f"⭐ Rating: {movie.rating}\n"
-            response += f"🎭 Genres: {', '.join(movie.genres)}\n"
-            if movie.imdb_rating:
-                response += f"📊 IMDB Rating: {movie.imdb_rating}/10\n"
-            response += "\n"
-        
-        return response
+
+        return format_movie_list(movies, "top movies")
     except ValueError:
         return f"Invalid rating: {rating}. Please use one of: {', '.join(r.value for r in Rating)}"
 
@@ -152,33 +172,203 @@ async def find_movies_title_cast(title: str, cast: str, context: Context) -> str
         str: A formatted string with a list of movies matching the query.
     """
     logger.info(f"Searching movies with title: {title} and cast: {cast}")
-    movies = await movie_service.search_movies(title+" "+cast)
-    
+    movies = await movie_service.search_movies(f"{title} {cast}")
+
     if not movies:
         return f"No movies found matching '{title}' and '{cast}'."
+
+    return format_movie_list(movies, f"movies matching '{title}' and '{cast}'")
+
+
+# ============================================================================
+# MCP Resources
+# ============================================================================
+# Resources allow servers to expose data that provides context to language models.
+# See: https://modelcontextprotocol.io/specification/2025-11-25/server/resources
+
+@mcp.resource("movie://database")
+async def get_movie_database() -> str:
+    """
+    Get the entire movie database as a JSON resource.
     
-    # Format response with movie details
-    response = f"Here are the movies matching '{title}' and '{cast}':\n\n"
-    for movie in movies:
-        response += f"🎬 {movie.title}\n"
-        response += f"📝 {movie.description}\n"
-        response += f"⭐ Rating: {movie.rating}\n"
-        response += f"🎭 Genres: {', '.join(movie.genres)}\n"
-        if movie.imdb_rating:
-            response += f"📊 IMDB Rating: {movie.imdb_rating}/10\n"
-        response += "\n"
+    This resource provides access to all movie data in the system,
+    which can be used by clients to provide context about available movies.
+    """
+    file_path = os.path.join(os.path.dirname(__file__), "..", "data", "movies.json")
+    with open(file_path, "r") as f:
+        data = json.load(f)
+    return json.dumps(data, indent=2)
+
+
+@mcp.resource("movie://genres")
+async def get_genres_list() -> str:
+    """
+    Get a list of all available movie genres.
     
-    return response
+    This resource provides a list of all genres in the database,
+    useful for clients to understand what movie categories are available.
+    """
+    genres = [genre.value for genre in Genre]
+    return json.dumps({"genres": genres}, indent=2)
 
-# Helper functions for basic movie operations
 
-# Create FastMCP app
-mcp_app = mcp.http_app(path="/mcp-server/mcp" , transport='streamable-http')
+@mcp.resource("movie://{movie_id}")
+async def get_movie_by_id(movie_id: str) -> str:
+    """
+    Get a specific movie by ID.
+    
+    Args:
+        movie_id: The unique identifier of the movie.
+        
+    This resource template allows accessing individual movies by their ID,
+    following the MCP resource template pattern.
+    """
+    file_path = os.path.join(os.path.dirname(__file__), "..", "data", "movies.json")
+    with open(file_path, "r") as f:
+        movies = json.load(f)
+    
+    movie = next((m for m in movies if m.get("id") == movie_id), None)
+    if not movie:
+        return json.dumps({"error": f"Movie with ID {movie_id} not found"}, indent=2)
+    
+    return json.dumps(movie, indent=2)
 
-# Apply middleware to MCP app
-mcp_app.add_middleware(LoggingMiddleware)
-# Conditionally apply JWT middleware
-logger.info(f"ENABLE_JWT: {settings.ENABLE_JWT}")
-if settings.ENABLE_JWT:
-    mcp_app.add_middleware(JWTAuthMiddleware)
-mcp_app.add_middleware(OriginValidationMiddleware) 
+
+# ============================================================================
+# MCP Prompts
+# ============================================================================
+# Prompts allow servers to expose prompt templates to clients.
+# See: https://modelcontextprotocol.io/specification/2025-11-25/server/prompts
+
+@mcp.prompt()
+async def movie_recommendation_prompt(
+    genre: str,
+    mood: str = "Any",
+    max_duration: int = 180,
+) -> list:
+    """
+    Get a prompt template for requesting movie recommendations.
+    
+    Args:
+        genre: The movie genre to recommend (e.g., "Action", "Comedy", "Drama")
+        mood: The desired mood or atmosphere (default: "Any")
+        max_duration: Maximum movie duration in minutes (default: 180)
+        
+    This prompt provides a structured message that clients can use to ask
+    for movie recommendations with specific criteria.
+    """
+    return [
+        {
+            "role": "user",
+            "content": {
+                "type": "text",
+                "text": f"I'm looking for {genre} movie recommendations. "
+                f"I'm in the mood for something {mood.lower()} and prefer "
+                f"movies under {max_duration} minutes. "
+                f"Can you help me find some great {genre} movies to watch?",
+            },
+        }
+    ]
+
+
+@mcp.prompt()
+async def movie_comparison_prompt(
+    movie1_title: str,
+    movie2_title: str,
+    comparison_aspects: str = "rating,genre,duration",
+) -> list:
+    """
+    Get a prompt template for comparing two movies.
+    
+    Args:
+        movie1_title: Title of the first movie to compare
+        movie2_title: Title of the second movie to compare
+        comparison_aspects: Comma-separated list of aspects to compare
+                           (e.g., "rating,genre,duration")
+        
+    This prompt helps users compare two movies across different aspects.
+    """
+    aspects_list = [aspect.strip() for aspect in comparison_aspects.split(",")]
+    aspects_text = ", ".join(aspects_list[:-1])
+    if len(aspects_list) > 1:
+        aspects_text += f", and {aspects_list[-1]}"
+    else:
+        aspects_text = aspects_list[0] if aspects_list else "various aspects"
+    
+    return [
+        {
+            "role": "user",
+            "content": {
+                "type": "text",
+                "text": f"Please compare '{movie1_title}' and '{movie2_title}' "
+                f"based on the following aspects: {aspects_text}. "
+                f"Help me understand the similarities and differences between "
+                f"these two movies to help me decide which one to watch.",
+            },
+        }
+    ]
+
+
+@mcp.prompt()
+async def movie_search_prompt(
+    query: str,
+    search_type: str = "title",
+) -> list:
+    """
+    Get a prompt template for searching movies.
+    
+    Args:
+        query: The search query (title, actor, or keyword)
+        search_type: Type of search - "title", "cast", or "any" (default: "title")
+        
+    This prompt helps users search for movies by various criteria.
+    """
+    search_descriptions = {
+        "title": "by title",
+        "cast": "by actor or cast member",
+        "any": "by title, cast, or description",
+    }
+    search_desc = search_descriptions.get(search_type, "by title")
+    
+    return [
+        {
+            "role": "user",
+            "content": {
+                "type": "text",
+                "text": f"I'm searching for movies {search_desc} using the query: '{query}'. "
+                f"Can you help me find movies that match this search? "
+                f"Please provide details about any matching movies you find.",
+            },
+        }
+    ]
+
+
+def apply_http_middleware(mcp_app):
+    """
+    Apply HTTP-level middleware to MCP FastAPI app.
+    
+    Note: These middleware work at the HTTP level (headers, requests, etc.)
+    and must be applied to the FastAPI app instance, not the FastMCP instance.
+    For MCP protocol-level middleware, use mcp.add_middleware() instead.
+    """
+    # HTTP request/response logging
+    mcp_app.add_middleware(LoggingMiddleware)
+    
+    # Conditionally apply JWT middleware (requires HTTP Authorization header)
+    logger.info(f"ENABLE_JWT: {settings.ENABLE_JWT}")
+    if settings.ENABLE_JWT:
+        mcp_app.add_middleware(JWTAuthMiddleware)
+    
+    # HTTP origin validation (requires HTTP Origin header)
+    mcp_app.add_middleware(OriginValidationMiddleware(mcp_app))
+
+
+# Create FastMCP app (FastMCP middleware is already added above)
+# Transport options:
+# - "streamable-http": HTTP-based transport for web APIs (default, recommended)
+# - "stdio": Standard I/O transport for CLI/integrated applications
+# mcp_app = mcp.http_app(path="/mcp", transport="stdio")  # Uncomment for stdio transport
+mcp_app = mcp.http_app(path="/mcp", transport=settings.MCP_TRANSPORT)
+
+# Apply HTTP-level middleware to the FastAPI app
+apply_http_middleware(mcp_app) 

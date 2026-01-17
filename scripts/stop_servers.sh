@@ -28,7 +28,4 @@ kill_process_by_port() {
 # Stop FastAPI server (port 8000)
 kill_process_by_port 8000 "FastAPI server"
 
-# Stop Arize Phoenix server (port 6006)
-kill_process_by_port 6006 "Arize Phoenix server"
-
 echo "Servers stopped successfully!" 

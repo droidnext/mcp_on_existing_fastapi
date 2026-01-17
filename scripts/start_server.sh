@@ -9,11 +9,9 @@ PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 cd "$PROJECT_ROOT"
 
 # Set environment variables
-export PHOENIX_COLLECTOR_ENDPOINT="http://localhost:6006"
 export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
 
 # Start FastAPI server
 echo "Starting FastAPI server..."
-echo "Phoenix collector endpoint: $PHOENIX_COLLECTOR_ENDPOINT"
 echo "Project root: $PROJECT_ROOT"
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 
