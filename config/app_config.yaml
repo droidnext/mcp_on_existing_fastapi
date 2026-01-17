@@ -9,5 +9,22 @@ server:
     - "http://localhost:3000"
 
 mcp:
-  tool_timeout: 30  # seconds
-  enable_arize: false  # Control Arize Phoenix instrumentation 
+  tool_timeout: 60  # seconds
+  # Transport options: "streamable-http" (default) or "stdio"
+  # streamable-http: HTTP-based transport for web APIs
+  # stdio: Standard I/O transport for CLI/integrated applications
+  transport: "streamable-http"  # Options: "streamable-http", "stdio"
+
+auth:
+  # Enable/disable JWT authentication middleware
+  # When enabled, all requests (except /docs, /openapi.json, /health, /ready) require JWT Bearer token
+  enable_jwt: false  # Default: disabled (set to true to enable JWT authentication)
+  # Secret key options:
+  # 1. For symmetric algorithms (HS256/HS384/HS512): Required - provide secret_key
+  # 2. For asymmetric algorithms with JWKS (RS256/ES256): Optional - tokens use 'jku' header to fetch public keys
+  # 3. Can be empty if all tokens use JWKS via 'jku' header
+  secret_key: ""  # JWT secret key (optional if using JWKS, required for symmetric algorithms, use environment variable in production)
+  algorithm: "HS256"  # Default JWT signing algorithm (used if not specified in token header)
+  # Allowed algorithms: List of algorithms that tokens can use (validates against this list)
+  # If not specified, defaults to common JWT algorithms
+  allowed_algorithms: ["HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512"] 

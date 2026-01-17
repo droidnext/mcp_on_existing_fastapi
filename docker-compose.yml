@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi-mcp-app
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=prod
+      - ENABLE_ELICITATION=${ENABLE_ELICITATION:-false}
+      - ENABLE_JWT=${ENABLE_JWT:-false}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-me-in-production}
+      - PYTHONPATH=/app
+    volumes:
+      # Mount config directory for easy configuration updates
+      - ./config:/app/config:ro
+      # Mount data directory if you need to update movies.json
+      - ./app/data:/app/app/data:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/routes')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - mcp-network
+
+  # Development service with hot reload
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi-mcp-app-dev
+    ports:
+      - "8001:8000"
+    environment:
+      - APP_ENV=dev
+      - ENABLE_ELICITATION=${ENABLE_ELICITATION:-false}
+      - ENABLE_JWT=${ENABLE_JWT:-false}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-secret-key}
+      - PYTHONPATH=/app
+    volumes:
+      # Mount entire codebase for hot reload
+      - .:/app
+      - /app/__pycache__
+      - /app/.pytest_cache
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    profiles:
+      - dev
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge
