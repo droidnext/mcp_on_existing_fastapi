@@ -67,8 +67,16 @@ def setup_logging(env: str = "dev", log_level: str = None):
             # If we can't write to log directory, continue without file logging
             logging.warning(f"Could not create file handler: {e}")
 
-    # Set log levels for third-party libraries
+    # Set log levels for third-party libraries (suppress verbose logs)
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
+    
+    # Suppress FastMCP internal task queue logs (docket, fakeredis)
+    logging.getLogger("docket").setLevel(logging.WARNING)
+    logging.getLogger("docket.worker").setLevel(logging.WARNING)
+    logging.getLogger("fakeredis").setLevel(logging.WARNING)
+    
+    # Suppress other noisy third-party libraries
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
 
     logging.info(f"Logging configured for environment: {env} (level: {logging.getLevelName(level)})") 

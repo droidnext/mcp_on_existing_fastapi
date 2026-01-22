@@ -271,8 +271,8 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         """Process request with JWT authentication."""
-        # Exclude public paths
-        if request.url.path in ["/docs", "/openapi.json", "/", "/mcp/docs"]:
+        # Exclude public paths (no JWT required)
+        if request.url.path in ["/docs", "/openapi.json", "/", "/mcp/docs", "/health", "/ready"]:
             return await call_next(request)
 
         # Extract token from Authorization header

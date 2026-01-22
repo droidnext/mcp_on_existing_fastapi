@@ -45,16 +45,57 @@ cd <repository-name>
 
 ## 🛠️ Setup Instructions
 
-Set up the development environment:
+### Python Environment Setup
+
+**Important:** This project requires **Python 3.10 or higher**. Check your Python version:
+```bash
+python3 --version  # Should show 3.10.x or higher
+```
+
+If you have Python 3.9 or lower, you'll need to install Python 3.10+:
+- **macOS:** `brew install python@3.11` or download from [python.org](https://www.python.org/downloads/)
+- **Linux:** Use your package manager: `sudo apt install python3.11` (Ubuntu/Debian)
+
+Set up the development environment using `uv`:
 
 ```bash
-uv init
+# Create virtual environment
 uv venv
-source .venv/bin/activate
+
+# Activate virtual environment
+source .venv/bin/activate  # On macOS/Linux
+# or
+.venv\Scripts\activate  # On Windows
+
+# Install dependencies
 uv pip install -r requirements.txt
+```
 
+**Alternative: Using standard pip (if `uv` is not available):**
 
-Install MCP inspector:
+```bash
+# Create virtual environment
+python3 -m venv .venv  # Use python3 on macOS/Linux, python on Windows
+
+# Activate virtual environment
+source .venv/bin/activate  # On macOS/Linux
+# or
+.venv\Scripts\activate  # On Windows
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+**Verify installation:**
+```bash
+# After activating venv, verify dependencies are installed
+python3 -c "import pydantic_settings; print('Dependencies installed!')"
+```
+
+### MCP Inspector (Optional)
+
+Install MCP inspector for testing and debugging:
+
 ```bash
 npm install @modelcontextprotocol/inspector
 ```
@@ -100,7 +141,7 @@ auth:
 - `APP_ENV`: Set to `'dev'` or `'prod'` to use different configurations
 - `ENABLE_JWT`: Toggle JWT authentication (`true`/`false`)
 - `ENABLE_ELICITATION`: Enable MCP elicitation features (`true`/`false`)
-- `JWT_SECRET_KEY`: JWT secret key (optional if using JWKS)
+- `JWT_SECRET_KEY`: JWT secret key (optional if using JWKS, required for symmetric algorithms)
 - `LOG_LEVEL`: Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`)
 
 #### JWT Configuration
@@ -168,18 +209,43 @@ docker run -p 8000:8000 -v $(pwd):/app fastapi-mcp-app:dev
 # Set environment variables in .env or docker-compose.yml
 ENABLE_ELICITATION=true
 ENABLE_JWT=false
+# Optional if using JWKS, required for symmetric algorithms
 JWT_SECRET_KEY=your-secret-key
 ```
 
 ### Using Python Directly
 
+**Important:** Make sure your virtual environment is activated before running the server!
+
+```bash
+# Activate virtual environment first
+source .venv/bin/activate  # On macOS/Linux
+# or
+.venv\Scripts\activate  # On Windows
+
+# Verify you're using the venv Python
+which python3  # Should show path to .venv/bin/python3
+```
+
+**Note:** On macOS and Linux, use `python3` instead of `python` if `python` command is not available.
+
 1. Start the FastAPI server:
 ```bash
-# Development
-APP_ENV=dev python -m uvicorn app.main:app --reload
+# Development (make sure virtual environment is activated)
+APP_ENV=dev python3 -m uvicorn app.main:app --reload
 
 # Production
-APP_ENV=prod python -m uvicorn app.main:app
+APP_ENV=prod python3 -m uvicorn app.main:app
+```
+
+**Or use the start script:**
+```bash
+# Make script executable (first time only)
+chmod +x scripts/start_server.sh
+
+# Activate venv first, then run the script
+source .venv/bin/activate
+./scripts/start_server.sh
 ```
 
 2. Start the MCP inspector:
@@ -200,6 +266,101 @@ npx @modelcontextprotocol/inspector node build/index.js
 ### MCP Endpoints
 - `POST /mcp` - MCP tools endpoint (JSON-RPC 2.0)
 - `POST /mcp/elicitation` - MCP elicitation endpoint (optional, requires `ENABLE_ELICITATION=true`)
+
+**Note:** If JWT authentication is enabled (`enable_jwt: true`), MCP endpoints require a valid JWT Bearer token in the `Authorization` header.
+
+**To disable JWT for testing:** Set `enable_jwt: false` in your config file (`config/app_config.dev.yaml`) and restart the server.
+
+#### Calling MCP Endpoints with JWT
+
+**1. Generate a test JWT token:**
+```bash
+# Make sure you're in the project directory and venv is activated
+python3 scripts/generate_test_jwt.py
+
+# Or with custom secret (must match your JWT_SECRET_KEY config)
+python3 scripts/generate_test_jwt.py --secret "your-secret-key-here-min-32-chars"
+```
+
+**2. Use the token in requests:**
+
+**Using curl:**
+```bash
+TOKEN="<your-jwt-token-from-script>"
+
+curl -X POST http://localhost:8000/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/list",
+    "id": 1
+  }'
+```
+
+**Using Python requests:**
+```python
+import requests
+
+token = "<your-jwt-token>"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {token}"
+}
+
+response = requests.post(
+    "http://localhost:8000/mcp",
+    headers=headers,
+    json={
+        "jsonrpc": "2.0",
+        "method": "tools/list",
+        "id": 1
+    }
+)
+print(response.json())
+```
+
+**Using JavaScript/Node.js:**
+```javascript
+const token = "<your-jwt-token>";
+
+fetch("http://localhost:8000/mcp", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    jsonrpc: "2.0",
+    method: "tools/list",
+    id: 1
+  })
+})
+.then(res => res.json())
+.then(data => console.log(data));
+```
+
+**Quick Test Token Generation:**
+
+To generate a test JWT token that matches your server configuration:
+
+```bash
+# Activate your virtual environment first
+source .venv/bin/activate
+
+# Generate token with default settings (uses secret: dev-secret-key-for-testing-only-min-32-chars)
+python3 scripts/generate_test_jwt.py
+
+# Or specify your JWT_SECRET_KEY to match your config
+python3 scripts/generate_test_jwt.py --secret "your-actual-secret-key-from-config"
+```
+
+The script will output:
+- The JWT token
+- Example curl, Python, and JavaScript code snippets
+- Token expiration information
+
+**Important:** The token secret must match your `JWT_SECRET_KEY` configuration. If your config has an empty `secret_key` (using JWKS), you'll need to configure JWKS properly or set a secret key for symmetric algorithms.
 
 ### Documentation
 - `GET /docs` - Interactive API documentation (Swagger UI, disabled in production)
@@ -247,6 +408,7 @@ APP_ENV=dev
 
 2. Configure JWT (if enabled):
 ```bash
+# Optional if using JWKS, required for symmetric algorithms
 JWT_SECRET_KEY=your-secret-key
 ```
 
@@ -345,6 +507,7 @@ Claude Desktop will connect to MCP server and invoke suggsted_movies tool to fet
 1. **Set Environment Variables:**
    ```bash
    export APP_ENV=prod
+   # Optional if using JWKS, required for symmetric algorithms
    export JWT_SECRET_KEY=<strong-64+character-secret>
    export LOG_LEVEL=INFO
    ```
@@ -352,7 +515,7 @@ Claude Desktop will connect to MCP server and invoke suggsted_movies tool to fet
 2. **Update Production Config** (`config/app_config.prod.yaml`):
    - Replace `allowed_hosts` with actual production domains
    - Configure `allowed_algorithms` (restrict to needed algorithms)
-   - Ensure `JWT_SECRET_KEY` is set via environment variable
+   - Ensure `JWT_SECRET_KEY` is set via environment variable (optional if using JWKS, required for symmetric algorithms)
 
 3. **Configure Logging:**
    ```bash
@@ -382,6 +545,7 @@ docker-compose up -d --scale app=3
 
 ```bash
 APP_ENV=prod
+# Optional if using JWKS, required for symmetric algorithms
 JWT_SECRET_KEY=<your-secret-key>
 ENABLE_JWT=true
 LOG_LEVEL=INFO

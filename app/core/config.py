@@ -117,27 +117,36 @@ class Settings(BaseSettings):
         
         Note: secret_key is only required for symmetric algorithms (HS256/HS384/HS512).
         For asymmetric algorithms with JWKS (RS256/ES256), tokens can use 'jku' header
-        to fetch public keys, so secret_key may be empty.
+        to fetch public keys, so secret_key may be empty (defaults to JWKS).
+        
+        If JWT_SECRET_KEY is empty/not set, the system will default to using JWKS
+        (JSON Web Key Set) for token validation via the 'jku' header in tokens.
         """
         enable_jwt = info.data.get("ENABLE_JWT", False)
         env = info.data.get("ENV", "dev")
         
-        # Only validate if JWT is enabled
-        if enable_jwt:
-            # Secret key is optional if using JWKS (tokens with 'jku' header don't need it)
-            # But if provided, validate its strength
-            if v:
-                if len(v) < 32:
-                    raise ValueError("JWT_SECRET_KEY must be at least 32 characters if provided")
-                
-                # Stricter requirements for production
-                if env == "prod":
-                    if len(v) < 64:
-                        raise ValueError("JWT_SECRET_KEY must be at least 64 characters in production")
-                    
-                    # Check if using placeholder value
-                    if "${JWT_SECRET_KEY}" in v or v in ["change-me-in-production", "dev-secret-key"]:
-                        raise ValueError("JWT_SECRET_KEY must be set to a real value in production")
+        # Allow empty string - defaults to JWKS when JWT is enabled
+        # Empty is always allowed (for JWKS or when JWT is disabled)
+        if not v or not v.strip():
+            return v
+        
+        # If JWT is disabled, allow any value (no validation needed)
+        if not enable_jwt:
+            return v
+        
+        # Only validate length if JWT is enabled AND a secret key is provided
+        # (If empty, we assume JWKS will be used)
+        if len(v) < 32:
+            raise ValueError("JWT_SECRET_KEY must be at least 32 characters if provided")
+        
+        # Stricter requirements for production
+        if env == "prod":
+            if len(v) < 64:
+                raise ValueError("JWT_SECRET_KEY must be at least 64 characters in production")
+            
+            # Check if using placeholder value
+            if "${JWT_SECRET_KEY}" in v or v in ["change-me-in-production", "dev-secret-key"]:
+                raise ValueError("JWT_SECRET_KEY must be set to a real value in production")
         
         return v
 
