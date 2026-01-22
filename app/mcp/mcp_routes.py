@@ -50,7 +50,9 @@ class MCPLoggingMiddleware(Middleware):
     async def on_call_tool(self, context: MiddlewareContext, call_next):
         """Log tool calls with timing."""
         start = time.time()
-        tool_name = context.message.params.get("name", "unknown")
+        # FastMCP 2.0+ uses context.message directly (it's the params object)
+        # context.message is the CallToolRequestParams object
+        tool_name = getattr(context.message, "name", "unknown")
         logger.info(f"Calling tool: {tool_name}")
         try:
             result = await call_next(context)
@@ -93,7 +95,7 @@ async def health_check(request: Request) -> PlainTextResponse:
 @mcp.tool()
 @trace_tool("MCP.suggest_movie")
 @with_timeout(settings.MCP_TOOL_TIMEOUT)
-async def suggest_movie(genre: str, context: Context = None) -> str:
+async def suggest_movie(genre: str) -> str:
     """
     Suggest movies based on genre.
 
@@ -101,7 +103,6 @@ async def suggest_movie(genre: str, context: Context = None) -> str:
 
     Args:
         genre (str): The movie genre to base suggestions on.
-        context (Context): The user or session context for personalization.
 
     Returns:
         str: A formatted string containing movie suggestions.
@@ -122,7 +123,7 @@ async def suggest_movie(genre: str, context: Context = None) -> str:
 @mcp.tool()
 @trace_tool("MCP.get_top_movies")
 @with_timeout(settings.MCP_TOOL_TIMEOUT)
-async def get_top_movies(context: Context, rating: str = None) -> str:
+async def get_top_movies(rating: str = None) -> str:
     """
     Retrieve top-rated movies, optionally filtered by a specific rating.
 
@@ -131,7 +132,6 @@ async def get_top_movies(context: Context, rating: str = None) -> str:
     interested in critically acclaimed or popular content.
 
     Args:
-        context (Context): The user or session context for personalization.
         rating (str, optional): Rating category to filter top movies by.
 
     Returns:
@@ -157,7 +157,7 @@ async def get_top_movies(context: Context, rating: str = None) -> str:
 @mcp.tool()
 @trace_tool("MCP.find_movies_title_cast")
 @with_timeout(settings.MCP_TOOL_TIMEOUT)
-async def find_movies_title_cast(title: str, cast: str, context: Context) -> str:
+async def find_movies_title_cast(title: str, cast: str) -> str:
     """
     Search for movies by title or cast only.
 
@@ -166,7 +166,6 @@ async def find_movies_title_cast(title: str, cast: str, context: Context) -> str
     Args:
         title (str): The search keyword or phrase can be title of movie.
         cast (str): The search keyword or phrase can be cast member.
-        context (Context): The user or session context for personalization.
 
     Returns:
         str: A formatted string with a list of movies matching the query.
@@ -360,7 +359,7 @@ def apply_http_middleware(mcp_app):
         mcp_app.add_middleware(JWTAuthMiddleware)
     
     # HTTP origin validation (requires HTTP Origin header)
-    mcp_app.add_middleware(OriginValidationMiddleware(mcp_app))
+    mcp_app.add_middleware(OriginValidationMiddleware)
 
 
 # Create FastMCP app (FastMCP middleware is already added above)
